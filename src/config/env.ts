@@ -12,20 +12,12 @@ const LAN_IP = '192.168.1.9';
 // Detectar plataforma para elegir la URL correcta
 import { Platform } from 'react-native';
 
-function getApiBaseUrl(): string {
-  // En web → localhost funciona
-  if (Platform.OS === 'web') {
-    return 'http://localhost:3001/api/v1';
-  }
-  // En simulador Android → 10.0.2.2 apunta al host
-  if (Platform.OS === 'android') {
-    return `http://${LAN_IP}:3001/api/v1`;
-  }
-  // En simulador iOS → localhost funciona
-  // return 'http://localhost:3001/api/v1';
+const PROD_URL = 'https://invsshowsbackend-production.up.railway.app/api/v1';
 
-  // En dispositivo físico → usar IP LAN de la Mac
-  return `http://${LAN_IP}:3001/api/v1`; // iPhone físico / simulador iOS
+function getApiBaseUrl(): string {
+  // Usar siempre el backend en la nube (Railway) para todos los entornos
+  // Esto te permite probar en dispositivos físicos sin depender del WiFi de la Mac
+  return PROD_URL;
 }
 
 export const ENV = {

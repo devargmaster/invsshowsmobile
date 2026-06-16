@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   View, Text, TextInput, Pressable, FlatList,
-  StyleSheet, ActivityIndicator, ScrollView, Alert,
+  StyleSheet, ActivityIndicator, ScrollView, Alert, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -169,17 +169,23 @@ function EventsScreen({ navigation }: any) {
             style={styles.card}
             onPress={() => navigation.navigate('EventDetail', { eventId: item.id })}
           >
-            <View style={styles.cardRow}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              {item.isLive && (
-                <View style={styles.livePill}>
-                  <Text style={styles.livePillText}>● EN VIVO</Text>
-                </View>
-              )}
+            <Image 
+              source={{ uri: `https://picsum.photos/seed/${item.id}/400/200` }} 
+              style={styles.cardImage} 
+            />
+            <View style={styles.cardContent}>
+              <View style={styles.cardRow}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                {item.isLive && (
+                  <View style={styles.livePill}>
+                    <Text style={styles.livePillText}>● EN VIVO</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.meta}>{formatDate(item.date)}</Text>
+              {item.location && <Text style={styles.meta}>{item.location}</Text>}
+              <Text style={styles.badge}>{modeLabel(item.mode)}</Text>
             </View>
-            <Text style={styles.meta}>{formatDate(item.date)}</Text>
-            {item.location && <Text style={styles.meta}>{item.location}</Text>}
-            <Text style={styles.badge}>{modeLabel(item.mode)}</Text>
           </Pressable>
         )}
       />
@@ -277,6 +283,11 @@ function EventDetailScreen({ route, navigation }: any) {
 
   return (
     <ScrollView style={styles.screenScroll} contentContainerStyle={{ paddingBottom: 40 }}>
+      <Image 
+        source={{ uri: `https://picsum.photos/seed/${event.id}/800/400` }} 
+        style={styles.detailImage} 
+      />
+      
       {/* Header del evento */}
       <View style={styles.eventHeader}>
         {event.isLive && (
@@ -443,9 +454,15 @@ function TicketScreen() {
         <View>
           {selected.event && (
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>{selected.event.title}</Text>
-              <Text style={styles.meta}>{formatDate(selected.event.date)}</Text>
-              {selected.event.location && <Text style={styles.meta}>📍 {selected.event.location}</Text>}
+              <Image 
+                source={{ uri: `https://picsum.photos/seed/${selected.event.id}/400/200` }} 
+                style={styles.cardImage} 
+              />
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{selected.event.title}</Text>
+                <Text style={styles.meta}>{formatDate(selected.event.date)}</Text>
+                {selected.event.location && <Text style={styles.meta}>📍 {selected.event.location}</Text>}
+              </View>
             </View>
           )}
 
@@ -721,12 +738,16 @@ const styles = StyleSheet.create({
   note: { color: '#8F8FA3', fontSize: 12, marginTop: 16, lineHeight: 18 },
   noteCenter: { color: '#B9B9C8', textAlign: 'center', marginTop: 16, lineHeight: 20 },
 
-  card: { backgroundColor: '#181827', padding: 18, borderRadius: 16, marginBottom: 14 },
+  card: { backgroundColor: '#181827', borderRadius: 16, marginBottom: 14, overflow: 'hidden' },
+  cardImage: { width: '100%', height: 160, backgroundColor: '#2D2D45' },
+  cardContent: { padding: 18 },
   cardRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardTitle: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', flex: 1 },
   meta: { color: '#B9B9C8', marginTop: 5, fontSize: 13 },
   badge: { color: '#C4B5FD', marginTop: 10, fontWeight: '800' },
   description: { color: '#D1D1E0', fontSize: 15, lineHeight: 24, marginTop: 8 },
+
+  detailImage: { width: '100%', height: 220, backgroundColor: '#2D2D45', marginBottom: 16, borderRadius: 16 },
 
   livePill: {
     backgroundColor: '#7F1D1D', paddingHorizontal: 10, paddingVertical: 4,
