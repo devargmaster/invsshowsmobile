@@ -210,11 +210,18 @@ function EventDetailScreen({ route, navigation }: any) {
   const [streamData, setStreamData] = useState<StreamingTokenResponse | RecordingTokenResponse | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
 
+  const [hasTicket, setHasTicket] = useState(false);
+  const [buying, setBuying] = useState(false);
+
   useEffect(() => {
     eventsService.getById(eventId)
       .then(setEvent)
       .catch(e => setError(e instanceof ApiError ? e.message : 'Error cargando evento.'))
       .finally(() => setLoading(false));
+
+    ticketsService.getTicketForEvent(eventId)
+      .then(t => setHasTicket(!!t))
+      .catch(() => setHasTicket(false));
   }, [eventId]);
 
   // Cargar grabaciones cuando el evento está listo
@@ -259,6 +266,20 @@ function EventDetailScreen({ route, navigation }: any) {
       }
     } finally {
       setStreamLoading(false);
+    }
+  };
+
+  const handleBuyTicket = async () => {
+    setBuying(true);
+    setError(null);
+    try {
+      await ticketsService.createTicket(eventId);
+      setHasTicket(true);
+      Alert.alert('¡Éxito!', 'Entrada obtenida correctamente. Podés verla en la pestaña Entrada.');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Error al obtener la entrada.');
+    } finally {
+      setBuying(false);
     }
   };
 
@@ -366,15 +387,32 @@ function EventDetailScreen({ route, navigation }: any) {
 
       {/* Botón ir a QR si el evento es presencial */}
       {canGetTicket && (
-        <Pressable
-          style={[styles.secondaryButton, { marginTop: 14 }]}
-          onPress={() => navigation.navigate('Tabs', { screen: 'Entrada', params: { eventId } })}
-        >
-          <View style={styles.btnRow}>
-            <Ionicons name="qr-code" size={20} color="#A78BFA" />
-            <Text style={styles.secondaryButtonText}>Mi entrada QR</Text>
-          </View>
-        </Pressable>
+        hasTicket ? (
+          <Pressable
+            style={[styles.secondaryButton, { marginTop: 14 }]}
+            onPress={() => navigation.navigate('Tabs', { screen: 'Entrada', params: { eventId } })}
+          >
+            <View style={styles.btnRow}>
+              <Ionicons name="qr-code" size={20} color="#A78BFA" />
+              <Text style={styles.secondaryButtonText}>Mi entrada QR</Text>
+            </View>
+          </Pressable>
+        ) : (
+          <Pressable
+            style={[styles.primaryButton, { marginTop: 14, backgroundColor: '#10B981' }, buying && styles.buttonDisabled]}
+            onPress={handleBuyTicket}
+            disabled={buying}
+          >
+            {buying ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <View style={styles.btnRow}>
+                <Ionicons name="ticket" size={20} color="#FFF" />
+                <Text style={styles.primaryButtonText}>Obtener Entrada Gratis</Text>
+              </View>
+            )}
+          </Pressable>
+        )
       )}
     </ScrollView>
   );
