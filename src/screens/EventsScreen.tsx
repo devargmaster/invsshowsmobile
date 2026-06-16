@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, Pressable, ActivityIndicator, Image, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { eventsService } from '../services/eventsService';
 import { ApiError } from '../services/apiClient';
@@ -10,10 +11,12 @@ import { globalStyles as styles } from '../theme/globalStyles';
 export function EventsScreen({ navigation }: any) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
     setError(null);
     try {
       const data = await eventsService.getAll({ upcoming: true });
@@ -22,10 +25,15 @@ export function EventsScreen({ navigation }: any) {
       setError(e instanceof ApiError ? e.message : 'No se pudieron cargar los eventos.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   if (loading) {
     return (
@@ -46,6 +54,14 @@ export function EventsScreen({ navigation }: any) {
         data={events}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={() => load(true)} 
+            tintColor="#A78BFA"
+            colors={['#A78BFA']}
+          />
+        }
         ListEmptyComponent={
           !error ? <Text style={styles.emptyText}>No hay eventos disponibles.</Text> : null
         }
