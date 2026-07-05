@@ -12,7 +12,7 @@ export const ticketsService = {
 
   async getTicketForEvent(eventId: string): Promise<Ticket | null> {
     const tickets = await ticketsService.getMyTickets();
-    return tickets.find((t) => t.eventId === eventId) ?? null;
+    return tickets.find((t) => t.eventId === eventId && !t.used) ?? null;
   },
 
   async validateQr(qrPayload: string): Promise<ValidateTicketResponse> {

@@ -9,19 +9,30 @@ import type { Ticket } from '../types/tickets';
 import { formatDate } from '../utils/formatters';
 import { globalStyles as styles } from '../theme/globalStyles';
 
+import { useIsFocused } from '@react-navigation/native';
+
 export function TicketScreen() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Ticket | null>(null);
 
+  const isFocused = useIsFocused();
+
   const load = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
       const data = await ticketsService.getMyTickets();
       setTickets(data);
-      if (data.length > 0 && !selected) setSelected(data[0]);
+      setSelected((prev) => {
+        if (data.length === 0) return null;
+        if (!prev) return data[0];
+        const prevInData = data.find(t => t.id === prev.id);
+        if (!prevInData) return data[0];
+        // Si hay un ticket nuevo (data[0]) sin usar y estábamos viendo uno usado, seleccionamos el nuevo
+        if (!data[0].used && prev.used) return data[0];
+        return prevInData;
+      });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Error cargando tickets.');
     } finally {
@@ -29,7 +40,11 @@ export function TicketScreen() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { 
+    if (isFocused) {
+      load();
+    }
+  }, [isFocused, load]);
 
   if (loading) {
     return (
@@ -72,6 +87,7 @@ export function TicketScreen() {
             >
               <Text style={[styles.tabChipText, selected?.id === item.id && styles.tabChipTextActive]}>
                 {item.event?.title ?? item.eventId}
+                {item.used ? ' (Usada)' : ''}
               </Text>
             </Pressable>
           )}
