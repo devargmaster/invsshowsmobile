@@ -23,4 +23,13 @@ function getApiBaseUrl(): string {
 export const ENV = {
   API_BASE_URL: getApiBaseUrl(),
   TOKEN_STORAGE_KEY: 'invs_access_token',
+  // Web de INVS — se usa para resolver ahí la aceptación de entradas
+  // transferidas (no hay deep linking nativo configurado todavía).
+  // TODO: reemplazar por la URL real de producción de invs-web una vez
+  // desplegada (hoy no hay un valor confirmado).
+  WEB_BASE_URL: 'https://invs-web.example.com',
+  // Clave pública de Openpay Argentina (BBVA) para tokenizar tarjetas del
+  // lado del cliente. Vacía hasta que exista la cuenta real — el pago con
+  // tarjeta falla con un mensaje claro mientras tanto (ver openpayClient.ts).
+  OPENPAY_PUBLIC_KEY: '',
 };

@@ -1,21 +1,32 @@
 import { apiClient } from './apiClient';
-import type { Ticket, ValidateTicketResponse } from '../types/tickets';
+import type {
+  Ticket, ValidateTicketResponse, TicketTransfer, IncomingTransfer,
+} from '../types/tickets';
 
 export const ticketsService = {
-  async createTicket(eventId: string): Promise<Ticket> {
-    return apiClient.post<Ticket>('/tickets', { eventId });
-  },
-
   async getMyTickets(): Promise<Ticket[]> {
     return apiClient.get<Ticket[]>('/tickets/me');
   },
 
-  async getTicketForEvent(eventId: string): Promise<Ticket | null> {
+  async getTicketsForEvent(eventId: string): Promise<Ticket[]> {
     const tickets = await ticketsService.getMyTickets();
-    return tickets.find((t) => t.eventId === eventId && !t.used) ?? null;
+    return tickets.filter((t) => t.eventId === eventId);
   },
 
   async validateQr(qrPayload: string): Promise<ValidateTicketResponse> {
     return apiClient.post<ValidateTicketResponse>('/tickets/validate', { qrPayload });
+  },
+
+  // ─── Compartir / transferir ─────────────────────────────────────
+  async createTransfer(ticketId: string, toEmail: string): Promise<TicketTransfer> {
+    return apiClient.post<TicketTransfer>(`/tickets/${ticketId}/transfers`, { toEmail });
+  },
+
+  async cancelTransfer(transferId: string): Promise<TicketTransfer> {
+    return apiClient.delete<TicketTransfer>(`/tickets/transfers/${transferId}`);
+  },
+
+  async getIncomingTransfers(): Promise<IncomingTransfer[]> {
+    return apiClient.get<IncomingTransfer[]>('/tickets/transfers/incoming');
   },
 };

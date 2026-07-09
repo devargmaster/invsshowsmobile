@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, ActivityIndicator, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { ErrorBanner } from '../components/ErrorBanner';
@@ -25,8 +25,7 @@ export function EventDetailScreen({ route, navigation }: any) {
   const [streamData, setStreamData] = useState<StreamingTokenResponse | RecordingTokenResponse | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
 
-  const [hasTicket, setHasTicket] = useState(false);
-  const [buying, setBuying] = useState(false);
+  const [hasTickets, setHasTickets] = useState(false);
 
   useEffect(() => {
     eventsService.getById(eventId)
@@ -34,9 +33,9 @@ export function EventDetailScreen({ route, navigation }: any) {
       .catch(e => setError(e instanceof ApiError ? e.message : 'Error cargando evento.'))
       .finally(() => setLoading(false));
 
-    ticketsService.getTicketForEvent(eventId)
-      .then(t => setHasTicket(!!t))
-      .catch(() => setHasTicket(false));
+    ticketsService.getTicketsForEvent(eventId)
+      .then(tickets => setHasTickets(tickets.length > 0))
+      .catch(() => setHasTickets(false));
   }, [eventId]);
 
   useEffect(() => {
@@ -80,20 +79,6 @@ export function EventDetailScreen({ route, navigation }: any) {
       }
     } finally {
       setStreamLoading(false);
-    }
-  };
-
-  const handleBuyTicket = async () => {
-    setBuying(true);
-    setError(null);
-    try {
-      await ticketsService.createTicket(eventId);
-      setHasTicket(true);
-      Alert.alert('¡Éxito!', 'Entrada obtenida correctamente. Podés verla en la pestaña Entrada.');
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Error al obtener la entrada.');
-    } finally {
-      setBuying(false);
     }
   };
 
@@ -195,32 +180,28 @@ export function EventDetailScreen({ route, navigation }: any) {
       )}
 
       {canGetTicket && (
-        hasTicket ? (
+        <>
+          {hasTickets && (
+            <Pressable
+              style={[styles.secondaryButton, { marginTop: 14 }]}
+              onPress={() => navigation.navigate('Tabs', { screen: 'Entrada' })}
+            >
+              <View style={styles.btnRow}>
+                <Ionicons name="qr-code" size={20} color="#A78BFA" />
+                <Text style={styles.secondaryButtonText}>Ver mis entradas</Text>
+              </View>
+            </Pressable>
+          )}
           <Pressable
-            style={[styles.secondaryButton, { marginTop: 14 }]}
-            onPress={() => navigation.navigate('Tabs', { screen: 'Entrada', params: { eventId } })}
+            style={[styles.primaryButton, { marginTop: 14, backgroundColor: '#10B981' }]}
+            onPress={() => navigation.navigate('CheckoutCategories', { eventId })}
           >
             <View style={styles.btnRow}>
-              <Ionicons name="qr-code" size={20} color="#A78BFA" />
-              <Text style={styles.secondaryButtonText}>Mi entrada QR</Text>
+              <Ionicons name="ticket" size={20} color="#FFF" />
+              <Text style={styles.primaryButtonText}>Comprar entradas</Text>
             </View>
           </Pressable>
-        ) : (
-          <Pressable
-            style={[styles.primaryButton, { marginTop: 14, backgroundColor: '#10B981' }, buying && styles.buttonDisabled]}
-            onPress={handleBuyTicket}
-            disabled={buying}
-          >
-            {buying ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <View style={styles.btnRow}>
-                <Ionicons name="ticket" size={20} color="#FFF" />
-                <Text style={styles.primaryButtonText}>Obtener Entrada</Text>
-              </View>
-            )}
-          </Pressable>
-        )
+        </>
       )}
     </ScrollView>
   );

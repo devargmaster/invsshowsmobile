@@ -11,3 +11,7 @@ export function modeLabel(mode: string): string {
     : mode === 'STREAMING' ? 'Streaming'
     : 'Híbrido';
 }
+
+export function formatMoney(cents: number, currency = 'ARS'): string {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency }).format(cents / 100);
+}
