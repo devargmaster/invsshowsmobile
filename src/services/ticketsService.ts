@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import type {
-  Ticket, ValidateTicketResponse, TicketTransfer, IncomingTransfer,
+  Ticket, ValidateTicketResponse, RedeemableAddon, TicketTransfer, IncomingTransfer,
 } from '../types/tickets';
 
 export const ticketsService = {
@@ -15,6 +15,10 @@ export const ticketsService = {
 
   async validateQr(qrPayload: string): Promise<ValidateTicketResponse> {
     return apiClient.post<ValidateTicketResponse>('/tickets/validate', { qrPayload });
+  },
+
+  async redeemAddon(orderAddonId: string): Promise<RedeemableAddon> {
+    return apiClient.post<RedeemableAddon>(`/tickets/addons/${orderAddonId}/redeem`);
   },
 
   // ─── Compartir / transferir ─────────────────────────────────────
