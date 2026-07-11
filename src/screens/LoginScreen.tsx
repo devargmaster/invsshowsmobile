@@ -12,8 +12,8 @@ WebBrowser.maybeCompleteAuthSession();
 
 export function LoginScreen({ navigation }: any) {
   const { login, loginWithGoogle, isLoading, error } = useAuth();
-  const [email, setEmail] = useState('demo@invs.app');
-  const [password, setPassword] = useState('Demo123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // Sin GOOGLE_CLIENT_ID configurado el botón directamente no se muestra
   // (mismo criterio que el pago con tarjeta cuando falta Openpay) — el
