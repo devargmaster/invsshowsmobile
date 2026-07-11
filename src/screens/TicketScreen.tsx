@@ -200,7 +200,7 @@ export function TicketScreen() {
                 onPress={() => setSelected(item)}
               >
                 <Text style={[styles.tabChipText, selected?.id === item.id && styles.tabChipTextActive]}>
-                  {item.event?.title ?? item.eventId} {label}
+                  {item.event?.title ?? item.eventId} {label} · #{item.id.slice(0, 6).toUpperCase()}
                 </Text>
               </Pressable>
             );
@@ -222,8 +222,11 @@ export function TicketScreen() {
           )}
 
           {selected.category && (
-            <Text style={[styles.meta, { marginBottom: 4 }]}>Categoría: {selected.category.name}</Text>
+            <Text style={styles.meta}>Categoría: {selected.category.name}</Text>
           )}
+          <Text style={[styles.meta, { marginBottom: 4 }]}>
+            Comprada el {formatDate(selected.createdAt)} · #{selected.id.slice(0, 8).toUpperCase()}
+          </Text>
 
           {canShare && pendingTransfer ? (
             <View style={styles.unassignedBox}>
