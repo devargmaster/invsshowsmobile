@@ -105,6 +105,12 @@ export function TicketScreen() {
   const pendingTransfer = selected?.transfers?.find((t) => t.status === 'PENDING') ?? null;
   const isMine = selected?.holderUserId === user?.id;
   const isUnassignedOfMine = !selected?.holderUserId && selected?.purchaserUserId === user?.id;
+  // Se puede compartir una entrada comprada por mí, activa, que no tenga
+  // otro dueño (sin asignar o asignada a mí mismo).
+  const canShare =
+    selected?.purchaserUserId === user?.id &&
+    selected?.status === 'ACTIVE' &&
+    (!selected?.holderUserId || selected?.holderUserId === user?.id);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -219,35 +225,31 @@ export function TicketScreen() {
             <Text style={[styles.meta, { marginBottom: 4 }]}>Categoría: {selected.category.name}</Text>
           )}
 
-          {isUnassignedOfMine && selected.status === 'ACTIVE' ? (
+          {canShare && pendingTransfer ? (
             <View style={styles.unassignedBox}>
-              {pendingTransfer ? (
-                <>
-                  <View style={styles.pendingBadge}>
-                    <Ionicons name="mail-outline" size={18} color="#FBBF24" />
-                    <Text style={styles.pendingBadgeText}>
-                      Enviada a {pendingTransfer.toEmail} · pendiente de aceptar
-                    </Text>
-                  </View>
-                  <Pressable
-                    style={styles.cancelBtn}
-                    onPress={() => handleCancelTransfer(pendingTransfer.id)}
-                    disabled={cancellingId === pendingTransfer.id}
-                  >
-                    <Text style={styles.cancelBtnText}>
-                      {cancellingId === pendingTransfer.id ? 'Cancelando...' : 'Cancelar envío'}
-                    </Text>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <Text style={styles.unassignedText}>Esta entrada todavía no está asignada.</Text>
-                  <Pressable style={styles.shareBtn} onPress={() => setSharingTicket(selected)}>
-                    <Ionicons name="paper-plane" size={16} color="#FFF" />
-                    <Text style={styles.shareBtnText}>Compartir por email</Text>
-                  </Pressable>
-                </>
-              )}
+              <View style={styles.pendingBadge}>
+                <Ionicons name="mail-outline" size={18} color="#FBBF24" />
+                <Text style={styles.pendingBadgeText}>
+                  Enviada a {pendingTransfer.toEmail} · pendiente de aceptar
+                </Text>
+              </View>
+              <Pressable
+                style={styles.cancelBtn}
+                onPress={() => handleCancelTransfer(pendingTransfer.id)}
+                disabled={cancellingId === pendingTransfer.id}
+              >
+                <Text style={styles.cancelBtnText}>
+                  {cancellingId === pendingTransfer.id ? 'Cancelando...' : 'Cancelar envío'}
+                </Text>
+              </Pressable>
+            </View>
+          ) : isUnassignedOfMine && selected.status === 'ACTIVE' ? (
+            <View style={styles.unassignedBox}>
+              <Text style={styles.unassignedText}>Esta entrada todavía no está asignada.</Text>
+              <Pressable style={styles.shareBtn} onPress={() => setSharingTicket(selected)}>
+                <Ionicons name="paper-plane" size={16} color="#FFF" />
+                <Text style={styles.shareBtnText}>Compartir por email</Text>
+              </Pressable>
             </View>
           ) : selected.status === 'PENDING_PAYMENT' ? (
             <View style={styles.unassignedBox}>
@@ -276,6 +278,16 @@ export function TicketScreen() {
             <Text style={styles.noteCenter}>
               {selected.expiresAt ? `Válida hasta: ${formatDate(selected.expiresAt)}` : ''}
             </Text>
+          )}
+
+          {canShare && !pendingTransfer && !isUnassignedOfMine && (
+            <Pressable
+              style={[styles.shareBtn, { marginTop: 14, alignSelf: 'center' }]}
+              onPress={() => setSharingTicket(selected)}
+            >
+              <Ionicons name="paper-plane" size={16} color="#FFF" />
+              <Text style={styles.shareBtnText}>¿No vas vos? Compartila por email</Text>
+            </Pressable>
           )}
 
           {!isMine && !isUnassignedOfMine && (
