@@ -7,10 +7,12 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { ShareTicketModal } from '../components/ShareTicketModal';
 import { IncomingTransferBanner } from '../components/IncomingTransferBanner';
 import { ticketsService } from '../services/ticketsService';
+import { ordersService } from '../services/ordersService';
 import { ApiError } from '../services/apiClient';
 import { useAuth } from '../context/AuthContext';
 import type { Ticket } from '../types/tickets';
-import { formatDate } from '../utils/formatters';
+import type { Order, OrderStatus } from '../types/checkout';
+import { formatDate, formatMoney } from '../utils/formatters';
 import { globalStyles as styles } from '../theme/globalStyles';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -19,9 +21,18 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: '(Cancelada)',
 };
 
+const ORDER_STATUS_LABEL: Record<OrderStatus, { label: string; color: string }> = {
+  PAID: { label: 'Pagada', color: '#34D399' },
+  PENDING_PAYMENT: { label: 'Pago pendiente', color: '#FBBF24' },
+  FAILED: { label: 'Falló el pago', color: '#8F8FA3' },
+  CANCELLED: { label: 'Cancelada', color: '#8F8FA3' },
+};
+
 export function TicketScreen() {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [view, setView] = useState<'entradas' | 'pedidos'>('entradas');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Ticket | null>(null);
@@ -34,8 +45,12 @@ export function TicketScreen() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const data = await ticketsService.getMyTickets();
+      const [data, ordersData] = await Promise.all([
+        ticketsService.getMyTickets(),
+        ordersService.getMyOrders(),
+      ]);
       setTickets(data);
+      setOrders(ordersData);
       setSelected((prev) => {
         if (data.length === 0) return null;
         if (!prev) return data[0];
@@ -77,7 +92,7 @@ export function TicketScreen() {
     return <View style={styles.screen}><ErrorBanner message={error} onRetry={load} /></View>;
   }
 
-  if (tickets.length === 0) {
+  if (tickets.length === 0 && orders.length === 0) {
     return (
       <View style={styles.centerScreen}>
         <Ionicons name="ticket-outline" size={64} color="#3D3D5C" />
@@ -97,7 +112,73 @@ export function TicketScreen() {
 
       <IncomingTransferBanner />
 
-      {tickets.length > 1 && (
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+        {(['entradas', 'pedidos'] as const).map((v) => (
+          <Pressable
+            key={v}
+            style={[styles.tabChip, view === v && styles.tabChipActive]}
+            onPress={() => setView(v)}
+          >
+            <Text style={[styles.tabChipText, view === v && styles.tabChipTextActive]}>
+              {v === 'entradas' ? 'Entradas' : 'Pedidos'}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {view === 'pedidos' && (
+        orders.length === 0 ? (
+          <Text style={styles.emptyText}>Todavía no hiciste ninguna compra.</Text>
+        ) : (
+          <View>
+            {orders.map((o) => {
+              const status = ORDER_STATUS_LABEL[o.status];
+              const ticketCount = o.tickets?.length ?? 0;
+              return (
+                <View key={o.id} style={[styles.card, { padding: 16 }]}>
+                  <View style={styles.cardRow}>
+                    <Text style={styles.cardTitle}>{o.event?.title ?? 'Evento'}</Text>
+                    <Text style={{ color: status.color, fontWeight: '800', fontSize: 12 }}>
+                      {status.label}
+                    </Text>
+                  </View>
+                  <Text style={styles.meta}>Compra del {formatDate(o.createdAt)}</Text>
+                  <View style={{ marginTop: 12, gap: 6 }}>
+                    {ticketCount > 0 && (
+                      <Text style={{ color: '#D1D1E0', fontSize: 14 }}>
+                        {ticketCount}× {ticketCount === 1 ? 'Entrada' : 'Entradas'}
+                      </Text>
+                    )}
+                    {o.addons?.map((a) => (
+                      <View key={a.id} style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+                        <Text style={{ color: '#D1D1E0', fontSize: 14, flex: 1 }}>
+                          {a.quantity}× {a.addon?.name ?? 'Adicional'}
+                          {a.variant ? ` — ${a.variant.label}` : ''}
+                        </Text>
+                        <Text style={{ color: '#B9B9C8', fontSize: 14 }}>
+                          {formatMoney(a.unitPriceCents * a.quantity, o.currency)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderColor: '#2D2D45' }}>
+                    <Text style={{ color: '#B9B9C8', fontSize: 14 }}>Total</Text>
+                    <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 15 }}>
+                      {formatMoney(o.totalCents, o.currency)}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )
+      )}
+
+      {view === 'entradas' && tickets.length === 0 && (
+        <Text style={styles.emptyText}>No tenés entradas activas.</Text>
+      )}
+
+      {view === 'entradas' && tickets.length > 1 && (
         <FlatList
           data={tickets}
           horizontal
@@ -121,7 +202,7 @@ export function TicketScreen() {
         />
       )}
 
-      {selected && (
+      {view === 'entradas' && selected && (
         <View>
           {selected.event && (
             <View style={styles.card}>
