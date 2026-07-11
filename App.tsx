@@ -19,6 +19,11 @@ import { CheckoutSummaryScreen } from './src/screens/CheckoutSummaryScreen';
 import { CheckoutPaymentCardScreen } from './src/screens/CheckoutPaymentCardScreen';
 import { CheckoutTransferScreen } from './src/screens/CheckoutTransferScreen';
 import { OrderConfirmationScreen } from './src/screens/OrderConfirmationScreen';
+import { StreamingHubScreen } from './src/screens/StreamingHubScreen';
+import { ContentCheckoutScreen } from './src/screens/ContentCheckoutScreen';
+import { ContentPaymentCardScreen } from './src/screens/ContentPaymentCardScreen';
+import { ContentTransferScreen } from './src/screens/ContentTransferScreen';
+import { ContentPurchaseConfirmationScreen } from './src/screens/ContentPurchaseConfirmationScreen';
 
 type RootStackParamList = {
   Login: undefined;
@@ -30,6 +35,10 @@ type RootStackParamList = {
   CheckoutPaymentCard: { orderId: string };
   CheckoutTransfer: { orderId: string };
   OrderConfirmation: { orderId: string };
+  ContentCheckout: { type: 'recording' | 'event'; id: string; title: string; priceCents: number; currency: string };
+  ContentPaymentCard: { purchaseId: string };
+  ContentTransfer: { purchaseId: string };
+  ContentPurchaseConfirmation: { purchaseId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -50,7 +59,8 @@ function Tabs() {
         tabBarIcon: ({ color, size }) => {
           const iconMap: Record<string, string> = {
             Eventos: 'calendar',
-            Entrada: 'qr-code',
+            Streaming: 'film',
+            Compras: 'receipt',
             Staff: 'scan',
             Perfil: 'person',
           };
@@ -59,7 +69,8 @@ function Tabs() {
       })}
     >
       <Tab.Screen name="Eventos" component={EventsScreen} />
-      <Tab.Screen name="Entrada" component={TicketScreen} />
+      <Tab.Screen name="Streaming" component={StreamingHubScreen} />
+      <Tab.Screen name="Compras" component={TicketScreen} />
       {isStaff && <Tab.Screen name="Staff" component={ScannerScreen} />}
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
@@ -86,6 +97,10 @@ export default function App() {
             <Stack.Screen name="CheckoutPaymentCard" component={CheckoutPaymentCardScreen} options={{ title: 'Pago con tarjeta' }} />
             <Stack.Screen name="CheckoutTransfer" component={CheckoutTransferScreen} options={{ title: 'Transferencia' }} />
             <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} options={{ title: 'Confirmación', headerBackVisible: false }} />
+            <Stack.Screen name="ContentCheckout" component={ContentCheckoutScreen} options={{ title: 'Comprar contenido' }} />
+            <Stack.Screen name="ContentPaymentCard" component={ContentPaymentCardScreen} options={{ title: 'Pago con tarjeta' }} />
+            <Stack.Screen name="ContentTransfer" component={ContentTransferScreen} options={{ title: 'Transferencia' }} />
+            <Stack.Screen name="ContentPurchaseConfirmation" component={ContentPurchaseConfirmationScreen} options={{ title: 'Confirmación', headerBackVisible: false }} />
           </Stack.Navigator>
           <StatusBar style="light" />
         </NavigationContainer>

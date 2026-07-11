@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ordersService } from '../services/ordersService';
+import { contentPurchasesService } from '../services/contentPurchasesService';
 import { ApiError } from '../services/apiClient';
 import { ErrorBanner } from '../components/ErrorBanner';
-import type { Order } from '../types/checkout';
+import type { ContentPurchase } from '../types/content';
 import { globalStyles as styles } from '../theme/globalStyles';
 
-export function OrderConfirmationScreen({ route, navigation }: any) {
-  const { orderId } = route.params as { orderId: string };
+export function ContentPurchaseConfirmationScreen({ route, navigation }: any) {
+  const { purchaseId } = route.params as { purchaseId: string };
 
-  const [order, setOrder] = useState<Order | null>(null);
+  const [purchase, setPurchase] = useState<ContentPurchase | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    ordersService.getById(orderId)
-      .then(setOrder)
-      .catch((e) => setError(e instanceof ApiError ? e.message : 'Error cargando la orden.'))
+    contentPurchasesService.getById(purchaseId)
+      .then(setPurchase)
+      .catch((e) => setError(e instanceof ApiError ? e.message : 'Error cargando la compra.'))
       .finally(() => setLoading(false));
-  }, [orderId]);
+  }, [purchaseId]);
 
   if (loading) {
     return (
@@ -29,11 +29,12 @@ export function OrderConfirmationScreen({ route, navigation }: any) {
     );
   }
 
-  if (error || !order) {
-    return <View style={styles.screen}><ErrorBanner message={error ?? 'Orden no encontrada.'} /></View>;
+  if (error || !purchase) {
+    return <View style={styles.screen}><ErrorBanner message={error ?? 'Compra no encontrada.'} /></View>;
   }
 
-  const isPaid = order.status === 'PAID';
+  const isPaid = purchase.status === 'PAID';
+  const contentTitle = purchase.recording?.title ?? purchase.event?.title ?? 'este contenido';
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -46,24 +47,15 @@ export function OrderConfirmationScreen({ route, navigation }: any) {
       </Text>
       <Text style={styles.checkoutConfirmText}>
         {isPaid
-          ? 'Ya generamos tus entradas con su código QR. Las vas a encontrar en "Mis Entradas".'
-          : 'Tu comprobante quedó pendiente de validación. En cuanto lo confirmemos vas a poder ver tus entradas activas — te avisamos por mail.'}
+          ? `Ya podés ver "${contentTitle}" desde la sección Streaming.`
+          : `Tu comprobante para "${contentTitle}" quedó pendiente de validación — te avisamos por mail apenas lo confirmemos.`}
       </Text>
-
-      {!isPaid && (
-        <View style={styles.checkoutNote}>
-          <Ionicons name="alert-circle-outline" size={18} color="#FBBF24" />
-          <Text style={styles.checkoutNoteText}>
-            Podés seguir el estado de tu pago desde "Mis Entradas" en cualquier momento.
-          </Text>
-        </View>
-      )}
 
       <Pressable
         style={[styles.primaryButton, { marginTop: 28 }]}
-        onPress={() => navigation.navigate('Tabs', { screen: 'Compras' })}
+        onPress={() => navigation.navigate('Tabs', { screen: 'Streaming' })}
       >
-        <Text style={styles.primaryButtonText}>Ver mis entradas</Text>
+        <Text style={styles.primaryButtonText}>Volver a Streaming</Text>
       </Pressable>
     </ScrollView>
   );

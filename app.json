@@ -26,7 +26,8 @@
           "photosPermission": "INVS necesita acceso a tus fotos para subir el comprobante de transferencia."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ]
   }
 }

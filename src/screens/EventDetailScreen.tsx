@@ -8,9 +8,21 @@ import { ticketsService } from '../services/ticketsService';
 import { streamingService } from '../services/streamingService';
 import { ApiError } from '../services/apiClient';
 import type { Event } from '../types/events';
-import type { Recording, StreamingTokenResponse, RecordingTokenResponse } from '../types/streaming';
-import { formatDate, modeLabel } from '../utils/formatters';
+import type { StreamingTokenResponse, RecordingTokenResponse } from '../types/streaming';
+import type { RecordingWithAccess, AvailableAccess } from '../types/content';
+import { formatDate, modeLabel, formatMoney } from '../utils/formatters';
 import { globalStyles as styles } from '../theme/globalStyles';
+
+/** Arma un mensaje a partir del `availableAccess` que manda el backend en
+ * el 403 — reemplaza el viejo mensaje fijo de "necesitás suscripción". */
+function describeAccessDenial(availableAccess: AvailableAccess | undefined): { message: string; canBuy: boolean } {
+  if (!availableAccess) return { message: 'No tenés acceso a este contenido.', canBuy: false };
+  const parts: string[] = [];
+  if (availableAccess.subscription) parts.push('suscribirte');
+  if (availableAccess.purchase) parts.push(`comprarlo por ${formatMoney(availableAccess.purchase.priceCents, availableAccess.purchase.currency)}`);
+  if (parts.length === 0) return { message: 'Este contenido no está disponible por el momento.', canBuy: false };
+  return { message: `Para acceder podés ${parts.join(' o ')}.`, canBuy: !!availableAccess.purchase };
+}
 
 export function EventDetailScreen({ route, navigation }: any) {
   const { eventId } = route.params as { eventId: string };
@@ -20,10 +32,11 @@ export function EventDetailScreen({ route, navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [recordings, setRecordings] = useState<Recording[]>([]);
+  const [recordings, setRecordings] = useState<RecordingWithAccess[]>([]);
   const [streamLoading, setStreamLoading] = useState(false);
   const [streamData, setStreamData] = useState<StreamingTokenResponse | RecordingTokenResponse | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [streamBuyOption, setStreamBuyOption] = useState<{ type: 'recording' | 'event'; id: string; title: string; priceCents: number; currency: string } | null>(null);
 
   const [hasTickets, setHasTickets] = useState(false);
 
@@ -49,14 +62,24 @@ export function EventDetailScreen({ route, navigation }: any) {
   }, [event, eventId]);
 
   const handleWatchLive = async () => {
+    if (!event) return;
     setStreamLoading(true);
     setStreamError(null);
+    setStreamBuyOption(null);
     try {
       const data = await streamingService.getLiveToken(eventId);
       setStreamData(data);
     } catch (e) {
       if (e instanceof ApiError && e.statusCode === 403) {
-        setStreamError('Necesitás una suscripción activa para ver este evento.');
+        const availableAccess = (e.body as { availableAccess?: AvailableAccess })?.availableAccess;
+        const { message, canBuy } = describeAccessDenial(availableAccess);
+        setStreamError(message);
+        if (canBuy && availableAccess?.purchase) {
+          setStreamBuyOption({
+            type: 'event', id: eventId, title: event.title,
+            priceCents: availableAccess.purchase.priceCents, currency: availableAccess.purchase.currency,
+          });
+        }
       } else {
         setStreamError(e instanceof ApiError ? e.message : 'Error al obtener el stream.');
       }
@@ -65,15 +88,24 @@ export function EventDetailScreen({ route, navigation }: any) {
     }
   };
 
-  const handleWatchRecording = async (recordingId: string) => {
+  const handleWatchRecording = async (recording: RecordingWithAccess) => {
     setStreamLoading(true);
     setStreamError(null);
+    setStreamBuyOption(null);
     try {
-      const data = await streamingService.getRecordingToken(recordingId);
+      const data = await streamingService.getRecordingToken(recording.id);
       setStreamData(data);
     } catch (e) {
       if (e instanceof ApiError && e.statusCode === 403) {
-        setStreamError('Necesitás una suscripción activa para ver esta grabación.');
+        const availableAccess = (e.body as { availableAccess?: AvailableAccess })?.availableAccess;
+        const { message, canBuy } = describeAccessDenial(availableAccess);
+        setStreamError(message);
+        if (canBuy && availableAccess?.purchase) {
+          setStreamBuyOption({
+            type: 'recording', id: recording.id, title: recording.title,
+            priceCents: availableAccess.purchase.priceCents, currency: availableAccess.purchase.currency,
+          });
+        }
       } else {
         setStreamError(e instanceof ApiError ? e.message : 'Error al obtener la grabación.');
       }
@@ -154,7 +186,7 @@ export function EventDetailScreen({ route, navigation }: any) {
                 <Pressable
                   key={rec.id}
                   style={[styles.primaryButton, streamLoading && styles.buttonDisabled]}
-                  onPress={() => handleWatchRecording(rec.id)}
+                  onPress={() => handleWatchRecording(rec)}
                   disabled={streamLoading}
                 >
                   {streamLoading
@@ -176,6 +208,16 @@ export function EventDetailScreen({ route, navigation }: any) {
             </View>
           )}
           {streamError && <ErrorBanner message={streamError} />}
+          {streamBuyOption && (
+            <Pressable
+              style={[styles.secondaryButton, { marginTop: 10 }]}
+              onPress={() => navigation.navigate('ContentCheckout', streamBuyOption)}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Comprar acceso — {formatMoney(streamBuyOption.priceCents, streamBuyOption.currency)}
+              </Text>
+            </Pressable>
+          )}
         </View>
       )}
 
@@ -184,7 +226,7 @@ export function EventDetailScreen({ route, navigation }: any) {
           {hasTickets && (
             <Pressable
               style={[styles.secondaryButton, { marginTop: 14 }]}
-              onPress={() => navigation.navigate('Tabs', { screen: 'Entrada' })}
+              onPress={() => navigation.navigate('Tabs', { screen: 'Compras' })}
             >
               <View style={styles.btnRow}>
                 <Ionicons name="qr-code" size={20} color="#A78BFA" />

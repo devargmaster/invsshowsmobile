@@ -93,7 +93,7 @@ export function TicketScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text style={styles.title}>Mis Entradas</Text>
+      <Text style={styles.title}>Mis compras</Text>
 
       <IncomingTransferBanner />
 

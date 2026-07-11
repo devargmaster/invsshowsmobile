@@ -32,4 +32,9 @@ export const ENV = {
   // lado del cliente. Vacía hasta que exista la cuenta real — el pago con
   // tarjeta falla con un mensaje claro mientras tanto (ver openpayClient.ts).
   OPENPAY_PUBLIC_KEY: '',
+  // Client ID de Google (no es secreto) — mismo que usa el backend como
+  // audience al verificar el idToken. Si queda vacío, el botón de Google
+  // no se muestra (ver LoginScreen.tsx).
+  GOOGLE_CLIENT_ID:
+    '166934776809-eq9vd8kddhs1gtc21p6j28ohc443mqk6.apps.googleusercontent.com',
 };

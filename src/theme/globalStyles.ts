@@ -235,4 +235,47 @@ export const globalStyles = StyleSheet.create({
   incomingBannerText: { color: '#D1D1E0', fontSize: 13, flex: 1, lineHeight: 18 },
   incomingBannerAction: { backgroundColor: '#7C3AED', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   incomingBannerActionText: { color: '#FFF', fontWeight: '700', fontSize: 13 },
+
+  // ─── Login con Google ────────────────────────────────────────────
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20, marginBottom: 4 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#2D2D45' },
+  dividerText: { color: '#8F8FA3', fontSize: 13 },
+  googleButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: '#1F1F2E', borderWidth: 1, borderColor: '#2D2D45',
+    borderRadius: 14, padding: 15, marginTop: 16,
+  },
+  googleButtonText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+
+  // ─── Streaming Hub ──────────────────────────────────────────────
+  streamingSubtitle: { color: '#8F8FA3', fontSize: 13, marginBottom: 20, lineHeight: 19 },
+  contentCard: { backgroundColor: '#181827', borderRadius: 16, marginBottom: 16, overflow: 'hidden' },
+  contentCardMedia: { width: '100%', aspectRatio: 2, backgroundColor: '#2D2D45', position: 'relative' },
+  contentCardBadge: {
+    position: 'absolute', top: 10, left: 10, paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 8, backgroundColor: 'rgba(34,197,94,0.9)',
+  },
+  contentCardBadgeText: { color: '#FFF', fontSize: 11, fontWeight: '800' },
+  contentCardBody: { padding: 16 },
+  contentCardTitle: { color: '#FFF', fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  contentCardMeta: { color: '#A78BFA', fontSize: 12, marginBottom: 6 },
+  contentCardDesc: { color: '#8F8FA3', fontSize: 13, marginBottom: 10, lineHeight: 18 },
+  contentCardCta: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    borderRadius: 10, padding: 12, marginTop: 4,
+  },
+  contentCardCtaPrimary: { backgroundColor: '#7C3AED' },
+  contentCardCtaBuy: { borderWidth: 1.5, borderColor: '#7C3AED', backgroundColor: 'transparent' },
+  contentCardCtaText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
+  contentCardCtaTextBuy: { color: '#A78BFA', fontWeight: '700', fontSize: 14 },
+  contentCardNote: { color: '#8F8FA3', fontSize: 13, fontStyle: 'italic', marginTop: 4 },
+
+  playerOverlay: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'center', padding: 16, zIndex: 100,
+  },
+  playerClose: {
+    position: 'absolute', top: 40, right: 20, width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center', zIndex: 101,
+  },
 });
