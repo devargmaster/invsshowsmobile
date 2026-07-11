@@ -89,22 +89,30 @@ export function CheckoutAddonsScreen({ route, navigation }: any) {
                     </View>
                   )}
                 </View>
-                <View style={styles.checkoutStepper}>
+                {qty === 0 ? (
                   <Pressable
-                    style={[styles.checkoutStepperBtn, qty === 0 && styles.checkoutStepperBtnDisabled]}
-                    onPress={() => setAddonQuantity(addon, variant ?? null, Math.max(0, qty - 1))}
-                    disabled={qty === 0}
+                    style={{ backgroundColor: '#7C3AED', borderRadius: 999, paddingHorizontal: 18, paddingVertical: 10 }}
+                    onPress={() => setAddonQuantity(addon, variant ?? null, 1)}
                   >
-                    <Text style={styles.checkoutStepperBtnText}>−</Text>
+                    <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>Agregar</Text>
                   </Pressable>
-                  <Text style={styles.checkoutStepperCount}>{qty}</Text>
-                  <Pressable
-                    style={styles.checkoutStepperBtn}
-                    onPress={() => setAddonQuantity(addon, variant ?? null, qty + 1)}
-                  >
-                    <Text style={styles.checkoutStepperBtnText}>+</Text>
-                  </Pressable>
-                </View>
+                ) : (
+                  <View style={styles.checkoutStepper}>
+                    <Pressable
+                      style={styles.checkoutStepperBtn}
+                      onPress={() => setAddonQuantity(addon, variant ?? null, Math.max(0, qty - 1))}
+                    >
+                      <Text style={styles.checkoutStepperBtnText}>−</Text>
+                    </Pressable>
+                    <Text style={styles.checkoutStepperCount}>{qty}</Text>
+                    <Pressable
+                      style={styles.checkoutStepperBtn}
+                      onPress={() => setAddonQuantity(addon, variant ?? null, qty + 1)}
+                    >
+                      <Text style={styles.checkoutStepperBtnText}>+</Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
             );
           })
