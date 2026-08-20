@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { WebView } from 'react-native-webview';
-import type { ProviderType } from '../types/streaming';
+import type { ProviderType } from '../../../types/streaming';
 
 interface StreamPlayerProps {
   playbackUrl: string;

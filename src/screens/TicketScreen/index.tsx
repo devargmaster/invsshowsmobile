@@ -3,17 +3,17 @@ import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView, Image }
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import { useIsFocused } from '@react-navigation/native';
-import { ErrorBanner } from '../components/ErrorBanner';
-import { ShareTicketModal } from '../components/ShareTicketModal';
-import { IncomingTransferBanner } from '../components/IncomingTransferBanner';
-import { ticketsService } from '../services/ticketsService';
-import { ordersService } from '../services/ordersService';
-import { ApiError } from '../services/apiClient';
-import { useAuth } from '../context/AuthContext';
-import type { Ticket } from '../types/tickets';
-import type { Order, OrderStatus } from '../types/checkout';
-import { formatDate, formatMoney } from '../utils/formatters';
-import { globalStyles as styles } from '../theme/globalStyles';
+import { ErrorBanner } from '../../components/ErrorBanner';
+import { ShareTicketModal } from './components/ShareTicketModal';
+import { IncomingTransferBanner } from './components/IncomingTransferBanner';
+import { ticketsService } from '../../services/ticketsService';
+import { ordersService } from '../../services/ordersService';
+import { ApiError } from '../../services/apiClient';
+import { useAuth } from '../../context/AuthContext';
+import type { Ticket } from '../../types/tickets';
+import type { Order, OrderStatus } from '../../types/checkout';
+import { formatDate, formatMoney } from '../../utils/formatters';
+import { globalStyles as styles } from '../../theme/globalStyles';
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING_PAYMENT: '(Pendiente)',

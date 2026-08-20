@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Pressable, ActivityIndicator, ScrollView, Image, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StreamPlayer } from '../components/StreamPlayer';
-import { ErrorBanner } from '../components/ErrorBanner';
-import { streamingService } from '../services/streamingService';
-import { ApiError } from '../services/apiClient';
-import { formatMoney } from '../utils/formatters';
-import type { RecordingWithAccess } from '../types/content';
-import type { RecordingTokenResponse } from '../types/streaming';
-import { globalStyles as styles } from '../theme/globalStyles';
+import { StreamPlayer } from './components/StreamPlayer';
+import { ErrorBanner } from '../../components/ErrorBanner';
+import { streamingService } from '../../services/streamingService';
+import { ApiError } from '../../services/apiClient';
+import { formatMoney } from '../../utils/formatters';
+import type { RecordingWithAccess } from '../../types/content';
+import type { RecordingTokenResponse } from '../../types/streaming';
+import { globalStyles as styles } from '../../theme/globalStyles';
 
 export function StreamingHubScreen({ navigation }: any) {
   const [recordings, setRecordings] = useState<RecordingWithAccess[]>([]);

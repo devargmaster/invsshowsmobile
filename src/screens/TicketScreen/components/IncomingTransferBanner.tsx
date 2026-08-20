@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ticketsService } from '../services/ticketsService';
-import type { IncomingTransfer } from '../types/tickets';
-import { ENV } from '../config/env';
-import { globalStyles as styles } from '../theme/globalStyles';
+import { ticketsService } from '../../../services/ticketsService';
+import type { IncomingTransfer } from '../../../types/tickets';
+import { ENV } from '../../../config/env';
+import { globalStyles as styles } from '../../../theme/globalStyles';
 
 /**
  * Banner de "te compartieron una entrada". Aceptarla siempre se resuelve en

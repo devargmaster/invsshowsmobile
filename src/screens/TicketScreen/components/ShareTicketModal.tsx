@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Modal, View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ticketsService } from '../services/ticketsService';
-import { ApiError } from '../services/apiClient';
-import { globalStyles as styles } from '../theme/globalStyles';
+import { ticketsService } from '../../../services/ticketsService';
+import { ApiError } from '../../../services/apiClient';
+import { globalStyles as styles } from '../../../theme/globalStyles';
 
 interface ShareTicketModalProps {
   visible: boolean;
