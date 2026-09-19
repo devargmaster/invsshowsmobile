@@ -146,6 +146,11 @@ export function EventDetailScreen({ route, navigation }: any) {
             <Text style={styles.livePillText}>● EN VIVO AHORA</Text>
           </View>
         )}
+        {!event.date && (
+          <View style={styles.livePill}>
+            <Text style={styles.livePillText}>PRÓXIMAMENTE</Text>
+          </View>
+        )}
         <Text style={styles.title}>{event.title}</Text>
         <Text style={styles.meta}>{formatDate(event.date)}</Text>
         {event.location && <Text style={styles.meta}>📍 {event.location}</Text>}
@@ -221,7 +226,14 @@ export function EventDetailScreen({ route, navigation }: any) {
         </View>
       )}
 
-      {canGetTicket && (
+      {canGetTicket && !event.date && (
+        <View style={[styles.errorBox, { marginTop: 14 }]}>
+          <Ionicons name="time" size={20} color="#A78BFA" />
+          <Text style={styles.errorText}>Todavía no confirmamos la fecha — la venta de entradas se habilita apenas se defina.</Text>
+        </View>
+      )}
+
+      {canGetTicket && event.date && (
         <>
           {hasTickets && (
             <Pressable
