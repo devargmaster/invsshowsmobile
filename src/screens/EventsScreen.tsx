@@ -82,8 +82,13 @@ export function EventsScreen({ navigation }: any) {
                     <Text style={styles.livePillText}>● EN VIVO</Text>
                   </View>
                 )}
+                {!item.commerciallyReleased && (
+                  <View style={styles.livePill}>
+                    <Text style={styles.livePillText}>PRÓXIMAMENTE</Text>
+                  </View>
+                )}
               </View>
-              <Text style={styles.meta}>{formatDate(item.date)}</Text>
+              <Text style={styles.meta}>{item.commerciallyReleased ? formatDate(item.date) : 'Próximamente'}</Text>
               {item.location && <Text style={styles.meta}>{item.location}</Text>}
               <Text style={styles.badge}>{modeLabel(item.mode)}</Text>
             </View>
